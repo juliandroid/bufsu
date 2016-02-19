@@ -19,6 +19,7 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
  * C:E********************************************************************** */
 #include "os.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "DtaCommand.h"
 #include "DtaEndianFixup.h"
 #include "DtaHexDump.h"
@@ -33,6 +34,17 @@ DtaCommand::DtaCommand()
 	cmdbuf = (uint8_t*)((uintptr_t)cmdbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
 	respbuf = responsebuffer + IO_BUFFER_ALIGNMENT;
 	respbuf = (uint8_t*)((uintptr_t)respbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
+}
+
+DtaCommand::DtaCommand(uint32_t bufferSize)
+{
+    LOG(D1) << "Creating DtaCommand(bufferSize)";
+    uint8_t *ptrcmd  = (uint8_t*)calloc((size_t)bufferSize, sizeof(uint8_t));
+    uint8_t *ptrresp = (uint8_t*)calloc((size_t)bufferSize, sizeof(uint8_t));
+    cmdbuf = ptrcmd + IO_BUFFER_ALIGNMENT;
+    cmdbuf = (uint8_t*)((uintptr_t)cmdbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
+    respbuf = ptrresp + IO_BUFFER_ALIGNMENT;
+    respbuf = (uint8_t*)((uintptr_t)respbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
 }
 
 /* Fill in the header information and format the call */
@@ -278,4 +290,6 @@ DtaCommand::setHSN(uint32_t HSN)
 DtaCommand::~DtaCommand()
 {
     LOG(D1) << "Destroying DtaCommand";
+    free(cmdbuf);
+    free(respbuf);
 }
