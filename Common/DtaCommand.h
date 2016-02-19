@@ -127,7 +127,7 @@ private:
 	void * getRespBuffer();
 	uint8_t commandbuffer[IO_BUFFER_LENGTH + IO_BUFFER_ALIGNMENT]; /**< buffer allocation allow for 1k alignment */
 	uint8_t responsebuffer[IO_BUFFER_LENGTH + IO_BUFFER_ALIGNMENT]; /**< buffer allocation allow for 1k alignment */
-	uint8_t *cmdbuf;  /**< Pointer to the command buffer */
-    uint8_t *respbuf;  /**< pointer to the response buffer */
+	uint8_t *cmdbuf_base = NULL, *cmdbuf;  /**< Pointer to the command buffer */
+    uint8_t *respbuf_base = NULL, *respbuf;  /**< pointer to the response buffer */
     uint32_t bufferpos = 0;  /**< position of the next byte in the command buffer */
 };

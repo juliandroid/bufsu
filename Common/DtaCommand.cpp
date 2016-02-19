@@ -39,11 +39,11 @@ DtaCommand::DtaCommand()
 DtaCommand::DtaCommand(uint32_t bufferSize)
 {
     LOG(D1) << "Creating DtaCommand(bufferSize)";
-    uint8_t *ptrcmd  = (uint8_t*)calloc((size_t)bufferSize + IO_BUFFER_ALIGNMENT, sizeof(uint8_t));
-    uint8_t *ptrresp = (uint8_t*)calloc((size_t)bufferSize + IO_BUFFER_ALIGNMENT, sizeof(uint8_t));
-    cmdbuf = ptrcmd + IO_BUFFER_ALIGNMENT;
+    cmdbuf_base  = (uint8_t*)calloc((size_t)bufferSize + IO_BUFFER_ALIGNMENT, sizeof(uint8_t));
+    respbuf_base = (uint8_t*)calloc((size_t)bufferSize + IO_BUFFER_ALIGNMENT, sizeof(uint8_t));
+    cmdbuf = cmdbuf_base + IO_BUFFER_ALIGNMENT;
     cmdbuf = (uint8_t*)((uintptr_t)cmdbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
-    respbuf = ptrresp + IO_BUFFER_ALIGNMENT;
+    respbuf = respbuf_base + IO_BUFFER_ALIGNMENT;
     respbuf = (uint8_t*)((uintptr_t)respbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
 }
 
@@ -290,6 +290,6 @@ DtaCommand::setHSN(uint32_t HSN)
 DtaCommand::~DtaCommand()
 {
     LOG(D1) << "Destroying DtaCommand";
-    free(cmdbuf);
-    free(respbuf);
+    free(cmdbuf_base);
+    free(respbuf_base);
 }
