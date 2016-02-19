@@ -42,6 +42,8 @@ class DtaCommand {
 public:
     /** Default constructor, allocates the command and resonse buffers. */
     DtaCommand();
+    /** Constructor with custom buffer size */
+    DtaCommand(uint32_t bufferSize);
     /** Constructor that initializes the incokingUid and method fields. 
      *   @param InvokingUid  The UID used to call the SSC method 
      *   @param method The SSC method to be called

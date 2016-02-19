@@ -1117,28 +1117,30 @@ uint8_t DtaDevOpal::loadPBA(char * password, char * filename) {
 	char spinner[] = "|/-\\";
 	char progress_bar[] = "   [                     ]";
 
-	uint32_t filepos = 0;
+	uint32_t filepos = 0, bytestoread = 0, chunksize = 100*1024;
 	ifstream pbafile;
-	vector <uint8_t> buffer(1024,0x00), lengthtoken;
+	vector <uint8_t> buffer(chunksize, 0x00), lengthtoken;
 	//buffer.clear();
 	//buffer.reserve(1024);
 	//for (int i = 0; i < 1024; i++) {
 	//	buffer.push_back(0x00);
 	//}
-	lengthtoken.clear();
-	lengthtoken.push_back(0xd4);
-	lengthtoken.push_back(0x00);
+	//lengthtoken.clear();
+	//lengthtoken.push_back(0xd4);
+	//lengthtoken.push_back(0x00);
+
 	pbafile.open(filename, ios::in | ios::binary);
 	if (!pbafile) {
 		LOG(E) << "Unable to open PBA image file " << filename;
 		return DTAERROR_OPEN_ERR;
 	}
 	pbafile.seekg(0, pbafile.end);
-	fivepercent = ((pbafile.tellg() / 20) / 1024) * 1024;
+	bytestoread = pbafile.tellg();
+	fivepercent = ((bytestoread / 20) / 1024) * 1024;
 	if (0 == fivepercent) fivepercent++;
 	pbafile.seekg(0, pbafile.beg);
 
-	DtaCommand *cmd = new DtaCommand();
+	DtaCommand *cmd = new DtaCommand(chunksize);
 	if (NULL == cmd) {
 		LOG(E) << "Unable to create command object ";
 		return DTAERROR_OBJECT_CREATE_FAILED;
@@ -1157,7 +1159,16 @@ uint8_t DtaDevOpal::loadPBA(char * password, char * filename) {
 	}
 	LOG(I) << "Writing PBA to " << dev;
 	while (!pbafile.eof()) {
-		pbafile.read((char *)buffer.data(), 1024);
+		if (bytestoread < chunksize) {
+			chunksize = bytestoread;
+		}
+		pbafile.read((char *)buffer.data(), chunksize);
+		bytestoread -= chunksize;
+		lengthtoken.clear();
+		lengthtoken.push_back(0xe2); // 11100010 - Long Atom header
+		for (int i=2; i>=0; i--) {
+			lengthtoken.push_back((uint8_t)	(chunksize >> i*8) & 0xff);
+		}
 		if (!(filepos % fivepercent)) {
 			progress_bar[complete++] = star[0];
 			delete session;
@@ -1197,7 +1208,7 @@ uint8_t DtaDevOpal::loadPBA(char * password, char * filename) {
 			pbafile.close();
 			return lastRC;
 		}
-		filepos += 1024;
+		filepos += chunksize;
 	}
 	printf("\r%s %i bytes written \n", progress_bar, filepos);
 	delete cmd;
