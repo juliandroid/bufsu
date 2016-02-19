@@ -39,8 +39,8 @@ DtaCommand::DtaCommand()
 DtaCommand::DtaCommand(uint32_t bufferSize)
 {
     LOG(D1) << "Creating DtaCommand(bufferSize)";
-    uint8_t *ptrcmd  = (uint8_t*)calloc((size_t)bufferSize, sizeof(uint8_t));
-    uint8_t *ptrresp = (uint8_t*)calloc((size_t)bufferSize, sizeof(uint8_t));
+    uint8_t *ptrcmd  = (uint8_t*)calloc((size_t)bufferSize + IO_BUFFER_ALIGNMENT, sizeof(uint8_t));
+    uint8_t *ptrresp = (uint8_t*)calloc((size_t)bufferSize + IO_BUFFER_ALIGNMENT, sizeof(uint8_t));
     cmdbuf = ptrcmd + IO_BUFFER_ALIGNMENT;
     cmdbuf = (uint8_t*)((uintptr_t)cmdbuf & (uintptr_t)~(IO_BUFFER_ALIGNMENT - 1));
     respbuf = ptrresp + IO_BUFFER_ALIGNMENT;
